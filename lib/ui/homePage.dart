@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:pacman/ui/widgets/barrier.dart';
 import 'package:pacman/ui/widgets/path.dart';
@@ -119,8 +121,11 @@ class _HomePageState extends State<HomePage> {
   ];
   late List<int> food = [];
 
+  String direction = "right";
+
   @override
   void initState() {
+    super.initState();
     _getFood();
   }
 
@@ -132,30 +137,45 @@ class _HomePageState extends State<HomePage> {
         children: [
           Expanded(
             flex: MediaQuery.of(context).size.height.toInt() ~/ 85.42857,
-            child: GridView.builder(
-                itemCount: numberOfSquares,
-                physics: const NeverScrollableScrollPhysics(),
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: numberInRow,
-                  // childAspectRatio: 1.21,
-                  childAspectRatio: 1.1,
-                ),
-                itemBuilder: (BuildContext context, int index) {
-                  if (playerPos == index) {
-                    return const MyPlayer();
-                  } else if (barriers.contains(index)) {
-                    return MyBarrier(
-                      innerColor: Colors.blue[800]!,
-                      outerColor: Colors.blue[900]!,
-                      child: Text(index.toString()),
-                    );
-                  } else if (food.contains(index)) {
-                    return const MyPath(
-                      innerColor: Colors.yellow,
-                      outerColor: Colors.black,
-                    );
-                  }
-                }),
+            child: GestureDetector(
+              onVerticalDragUpdate: (details) {
+                if (details.delta.dy > 0) {
+                  direction = "down";
+                } else if (details.delta.dy < 0) {
+                  direction = "up";
+                }
+              },
+              onHorizontalDragUpdate: (details) {
+                if (details.delta.dx > 0) {
+                  direction = "right";
+                } else if (details.delta.dx < 0) {
+                  direction = "left";
+                }
+              },
+              child: GridView.builder(
+                  itemCount: numberOfSquares,
+                  physics: const NeverScrollableScrollPhysics(),
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: numberInRow,
+                    childAspectRatio: 1.1,
+                  ),
+                  itemBuilder: (BuildContext context, int index) {
+                    if (playerPos == index) {
+                      return const MyPlayer();
+                    } else if (barriers.contains(index)) {
+                      return MyBarrier(
+                        innerColor: Colors.blue[800]!,
+                        outerColor: Colors.blue[900]!,
+                        child: Text(index.toString()),
+                      );
+                    } else if (food.contains(index)) {
+                      return const MyPath(
+                        innerColor: Colors.yellow,
+                        outerColor: Colors.black,
+                      );
+                    }
+                  }),
+            ),
           ),
           Expanded(
             child: Row(
@@ -182,13 +202,66 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  _play() {}
-
+  // Get the food's initial position.
   _getFood() {
     for (int i = 0; i < numberOfSquares; i++) {
       if (!barriers.contains(i)) {
         food.add(i);
       }
+    }
+  }
+
+  _play() {
+    Timer.periodic(
+      const Duration(milliseconds: 120),
+      (timer) {
+        switch (direction) {
+          case "right":
+            _moveRight();
+            break;
+          case "left":
+            _moveLeft();
+            break;
+          case "up":
+            _moveUp();
+            break;
+          case "down":
+            _moveDown();
+            break;
+        }
+      },
+    );
+  }
+
+  _moveRight() {
+    if (!barriers.contains(playerPos + 1)) {
+      setState(() {
+        playerPos++;
+      });
+    }
+  }
+
+  _moveLeft() {
+    if (!barriers.contains(playerPos - 1)) {
+      setState(() {
+        playerPos--;
+      });
+    }
+  }
+
+  _moveUp() {
+    if (!barriers.contains(playerPos - numberInRow)) {
+      setState(() {
+        playerPos -= numberInRow;
+      });
+    }
+  }
+
+  _moveDown() {
+    if (!barriers.contains(playerPos + numberInRow)) {
+      setState(() {
+        playerPos += numberInRow;
+      });
     }
   }
 }
