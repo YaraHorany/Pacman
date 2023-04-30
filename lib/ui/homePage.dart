@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pacman/ui/widgets/barrier.dart';
 import 'package:pacman/ui/widgets/path.dart';
+import 'package:pacman/ui/widgets/player.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -12,6 +13,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   static int numberInRow = 11;
   int numberOfSquares = numberInRow * 17;
+  int playerPos = numberInRow * 15 + 1;
 
   final List<int> barriers = [
     0,
@@ -130,7 +132,6 @@ class _HomePageState extends State<HomePage> {
         children: [
           Expanded(
             flex: MediaQuery.of(context).size.height.toInt() ~/ 85.42857,
-            // flex: 8,
             child: GridView.builder(
                 itemCount: numberOfSquares,
                 physics: const NeverScrollableScrollPhysics(),
@@ -140,7 +141,9 @@ class _HomePageState extends State<HomePage> {
                   childAspectRatio: 1.1,
                 ),
                 itemBuilder: (BuildContext context, int index) {
-                  if (barriers.contains(index)) {
+                  if (playerPos == index) {
+                    return const MyPlayer();
+                  } else if (barriers.contains(index)) {
                     return MyBarrier(
                       innerColor: Colors.blue[800]!,
                       outerColor: Colors.blue[900]!,
