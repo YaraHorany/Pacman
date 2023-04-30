@@ -123,14 +123,16 @@ class _HomePageState extends State<HomePage> {
   ];
   late List<int> food = [];
 
-  late String direction;
+  late String playerDirection;
+  late String ghostDirection;
   late bool mouthClosed;
   late int score;
 
   @override
   void initState() {
     super.initState();
-    direction = "right";
+    playerDirection = "right";
+    ghostDirection = "left";
     mouthClosed = false;
     score = 0;
     _getFood();
@@ -148,18 +150,18 @@ class _HomePageState extends State<HomePage> {
               onVerticalDragUpdate: (details) {
                 if (details.delta.dy > 0 &&
                     _isNotBarrier(playerPos + numberInRow)) {
-                  direction = "down";
+                  playerDirection = "down";
                 } else if (details.delta.dy < 0 &&
                     _isNotBarrier(playerPos - numberInRow)) {
-                  direction = "up";
+                  playerDirection = "up";
                 }
               },
               onHorizontalDragUpdate: (details) {
                 if (details.delta.dx > 0 && _isNotBarrier(playerPos + 1)) {
-                  direction = "right";
+                  playerDirection = "right";
                 } else if (details.delta.dx < 0 &&
                     _isNotBarrier(playerPos - 1)) {
-                  direction = "left";
+                  playerDirection = "left";
                 }
               },
               child: GridView.builder(
@@ -181,7 +183,7 @@ class _HomePageState extends State<HomePage> {
                         ),
                       );
                     } else if (playerPos == index) {
-                      switch (direction) {
+                      switch (playerDirection) {
                         case "right":
                           return const MyPlayer();
                           break;
@@ -262,7 +264,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   _play() {
-    direction = "right";
+    playerDirection = "right";
     Timer.periodic(
       const Duration(milliseconds: 120),
       (timer) {
@@ -273,7 +275,7 @@ class _HomePageState extends State<HomePage> {
           food.remove(playerPos);
           score++;
         }
-        switch (direction) {
+        switch (playerDirection) {
           case "right":
             _moveRight();
             break;
@@ -287,6 +289,12 @@ class _HomePageState extends State<HomePage> {
             _moveDown();
             break;
         }
+      },
+    );
+    Timer.periodic(
+      const Duration(milliseconds: 190),
+      (timer) {
+        _moveGhost();
       },
     );
   }
@@ -329,5 +337,59 @@ class _HomePageState extends State<HomePage> {
       return true;
     }
     return false;
+  }
+
+  // Move the ghost randomly
+  _moveGhost() {
+    late List<String> ways = [];
+
+    if (_isNotBarrier(ghostPos + 1)) {
+      ways.add("right");
+    }
+    if (_isNotBarrier(ghostPos - 1)) {
+      ways.add("left");
+    }
+    if (_isNotBarrier(ghostPos - numberInRow)) {
+      ways.add("up");
+    }
+    if (_isNotBarrier(ghostPos + numberInRow)) {
+      ways.add("down");
+    }
+
+    // Do not reverse direction if possible
+    if (ghostDirection == 'left' &&
+        ways.contains('right') &&
+        ways.length != 1) {
+      ways.remove('right');
+    } else if (ghostDirection == 'right' &&
+        ways.contains('left') &&
+        ways.length != 1) {
+      ways.remove('left');
+    } else if (ghostDirection == 'up' &&
+        ways.contains('down') &&
+        ways.length != 1) {
+      ways.remove('down');
+    } else if (ghostDirection == 'down' &&
+        ways.contains('up') &&
+        ways.length != 1) {
+      ways.remove('up');
+    }
+
+    ghostDirection = ways[Random().nextInt(ways.length)];
+
+    switch (ghostDirection) {
+      case "right":
+        ghostPos++;
+        break;
+      case "left":
+        ghostPos--;
+        break;
+      case "up":
+        ghostPos -= numberInRow;
+        break;
+      case "down":
+        ghostPos += numberInRow;
+        break;
+    }
   }
 }
