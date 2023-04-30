@@ -122,12 +122,14 @@ class _HomePageState extends State<HomePage> {
   ];
   late List<int> food = [];
 
-  String direction = "right";
-  bool mouthClosed = false;
+  late String direction;
+  late bool mouthClosed;
 
   @override
   void initState() {
     super.initState();
+    direction = "right";
+    mouthClosed = false;
     _getFood();
   }
 
@@ -141,16 +143,19 @@ class _HomePageState extends State<HomePage> {
             flex: MediaQuery.of(context).size.height.toInt() ~/ 85.42857,
             child: GestureDetector(
               onVerticalDragUpdate: (details) {
-                if (details.delta.dy > 0) {
+                if (details.delta.dy > 0 &&
+                    _isNotBarrier(playerPos + numberInRow)) {
                   direction = "down";
-                } else if (details.delta.dy < 0) {
+                } else if (details.delta.dy < 0 &&
+                    _isNotBarrier(playerPos - numberInRow)) {
                   direction = "up";
                 }
               },
               onHorizontalDragUpdate: (details) {
-                if (details.delta.dx > 0) {
+                if (details.delta.dx > 0 && _isNotBarrier(playerPos + 1)) {
                   direction = "right";
-                } else if (details.delta.dx < 0) {
+                } else if (details.delta.dx < 0 &&
+                    _isNotBarrier(playerPos - 1)) {
                   direction = "left";
                 }
               },
@@ -282,7 +287,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   _moveRight() {
-    if (!barriers.contains(playerPos + 1)) {
+    if (_isNotBarrier(playerPos + 1)) {
       setState(() {
         playerPos++;
       });
@@ -290,7 +295,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   _moveLeft() {
-    if (!barriers.contains(playerPos - 1)) {
+    if (_isNotBarrier(playerPos - 1)) {
       setState(() {
         playerPos--;
       });
@@ -298,7 +303,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   _moveUp() {
-    if (!barriers.contains(playerPos - numberInRow)) {
+    if (_isNotBarrier(playerPos - numberInRow)) {
       setState(() {
         playerPos -= numberInRow;
       });
@@ -306,10 +311,17 @@ class _HomePageState extends State<HomePage> {
   }
 
   _moveDown() {
-    if (!barriers.contains(playerPos + numberInRow)) {
+    if (_isNotBarrier(playerPos + numberInRow)) {
       setState(() {
         playerPos += numberInRow;
       });
     }
+  }
+
+  bool _isNotBarrier(int index) {
+    if (!barriers.contains(index)) {
+      return true;
+    }
+    return false;
   }
 }
