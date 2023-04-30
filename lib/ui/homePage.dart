@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:pacman/ui/widgets/barrier.dart';
+import 'package:pacman/ui/widgets/ghost.dart';
 import 'package:pacman/ui/widgets/path.dart';
 import 'package:pacman/ui/widgets/player.dart';
 
@@ -17,6 +17,7 @@ class _HomePageState extends State<HomePage> {
   static int numberInRow = 11;
   int numberOfSquares = numberInRow * 17;
   int playerPos = numberInRow * 15 + 1;
+  int ghostPos = numberInRow * 2 - 2;
 
   final List<int> barriers = [
     0,
@@ -124,12 +125,14 @@ class _HomePageState extends State<HomePage> {
 
   late String direction;
   late bool mouthClosed;
+  late int score;
 
   @override
   void initState() {
     super.initState();
     direction = "right";
     mouthClosed = false;
+    score = 0;
     _getFood();
   }
 
@@ -203,11 +206,12 @@ class _HomePageState extends State<HomePage> {
                         default:
                           const MyPlayer();
                       }
+                    } else if (ghostPos == index) {
+                      return const Ghost();
                     } else if (barriers.contains(index)) {
                       return MyBarrier(
                         innerColor: Colors.blue[800]!,
                         outerColor: Colors.blue[900]!,
-                        child: Text(index.toString()),
                       );
                     } else if (food.contains(index)) {
                       return const MyPath(
@@ -227,9 +231,9 @@ class _HomePageState extends State<HomePage> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                const Text(
-                  'Score',
-                  style: TextStyle(color: Colors.white, fontSize: 20),
+                Text(
+                  "Score: $score",
+                  style: const TextStyle(color: Colors.white, fontSize: 20),
                 ),
                 GestureDetector(
                   onTap: () {
@@ -267,6 +271,7 @@ class _HomePageState extends State<HomePage> {
         });
         if (food.contains(playerPos)) {
           food.remove(playerPos);
+          score++;
         }
         switch (direction) {
           case "right":
@@ -318,6 +323,7 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  // Return true if the given index is located in the path and not in the barrier.
   bool _isNotBarrier(int index) {
     if (!barriers.contains(index)) {
       return true;
