@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:pacman/ui/widgets/barrier.dart';
@@ -161,7 +162,31 @@ class _HomePageState extends State<HomePage> {
                   ),
                   itemBuilder: (BuildContext context, int index) {
                     if (playerPos == index) {
-                      return const MyPlayer();
+                      switch (direction) {
+                        case "right":
+                          return const MyPlayer();
+                          break;
+                        case "left":
+                          return Transform.rotate(
+                            angle: pi,
+                            child: const MyPlayer(),
+                          );
+                          break;
+                        case "up":
+                          return Transform.rotate(
+                            angle: 3 * pi / 2,
+                            child: const MyPlayer(),
+                          );
+                          break;
+                        case "down":
+                          return Transform.rotate(
+                            angle: pi / 2,
+                            child: const MyPlayer(),
+                          );
+                          break;
+                        default:
+                          const MyPlayer();
+                      }
                     } else if (barriers.contains(index)) {
                       return MyBarrier(
                         innerColor: Colors.blue[800]!,
@@ -217,6 +242,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   _play() {
+    direction = "right";
     Timer.periodic(
       const Duration(milliseconds: 120),
       (timer) {
