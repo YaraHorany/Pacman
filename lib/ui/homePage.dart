@@ -17,7 +17,9 @@ class _HomePageState extends State<HomePage> {
   static int numberInRow = 11;
   int numberOfSquares = numberInRow * 17;
   int playerPos = numberInRow * 15 + 1;
-  int ghostPos = numberInRow * 2 - 2;
+  int ghost1Pos = numberInRow * 2 - 2;
+  int ghost2Pos = numberInRow * 6 + 1;
+  int ghost3Pos = numberInRow * 11 - 2;
 
   final List<int> barriers = [
     0,
@@ -124,7 +126,9 @@ class _HomePageState extends State<HomePage> {
   late List<int> food = [];
 
   late String playerDirection;
-  late String ghostDirection;
+  late String ghost1Direction;
+  late String ghost2Direction;
+  late String ghost3Direction;
   late bool mouthClosed;
   late int score;
 
@@ -132,7 +136,9 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     playerDirection = "right";
-    ghostDirection = "left";
+    ghost1Direction = "left";
+    ghost2Direction = "right";
+    ghost3Direction = "down";
     mouthClosed = false;
     score = 0;
     _getFood();
@@ -208,12 +214,29 @@ class _HomePageState extends State<HomePage> {
                         default:
                           const MyPlayer();
                       }
-                    } else if (ghostPos == index) {
-                      return const Ghost();
+                    } else if (ghost1Pos == index) {
+                      return Ghost(
+                        image: Image.asset(
+                          'images/ghost1.png',
+                        ),
+                      );
+                    } else if (ghost2Pos == index) {
+                      return Ghost(
+                        image: Image.asset(
+                          'images/ghost2.png',
+                        ),
+                      );
+                    } else if (ghost3Pos == index) {
+                      return Ghost(
+                        image: Image.asset(
+                          'images/ghost3.png',
+                        ),
+                      );
                     } else if (barriers.contains(index)) {
                       return MyBarrier(
                         innerColor: Colors.blue[800]!,
                         outerColor: Colors.blue[900]!,
+                        child: Text(index.toString()),
                       );
                     } else if (food.contains(index)) {
                       return const MyPath(
@@ -292,9 +315,11 @@ class _HomePageState extends State<HomePage> {
       },
     );
     Timer.periodic(
-      const Duration(milliseconds: 190),
+      const Duration(milliseconds: 500),
       (timer) {
-        _moveGhost();
+        _moveGhost1();
+        _moveGhost2();
+        _moveGhost3();
       },
     );
   }
@@ -340,55 +365,161 @@ class _HomePageState extends State<HomePage> {
   }
 
   // Move the ghost randomly
-  _moveGhost() {
+  _moveGhost1() {
     late List<String> ways = [];
 
-    if (_isNotBarrier(ghostPos + 1)) {
+    if (_isNotBarrier(ghost1Pos + 1)) {
       ways.add("right");
     }
-    if (_isNotBarrier(ghostPos - 1)) {
+    if (_isNotBarrier(ghost1Pos - 1)) {
       ways.add("left");
     }
-    if (_isNotBarrier(ghostPos - numberInRow)) {
+    if (_isNotBarrier(ghost1Pos - numberInRow)) {
       ways.add("up");
     }
-    if (_isNotBarrier(ghostPos + numberInRow)) {
+    if (_isNotBarrier(ghost1Pos + numberInRow)) {
       ways.add("down");
     }
 
     // Do not reverse direction if possible
-    if (ghostDirection == 'left' &&
+    if (ghost1Direction == 'left' &&
         ways.contains('right') &&
         ways.length != 1) {
       ways.remove('right');
-    } else if (ghostDirection == 'right' &&
+    } else if (ghost1Direction == 'right' &&
         ways.contains('left') &&
         ways.length != 1) {
       ways.remove('left');
-    } else if (ghostDirection == 'up' &&
+    } else if (ghost1Direction == 'up' &&
         ways.contains('down') &&
         ways.length != 1) {
       ways.remove('down');
-    } else if (ghostDirection == 'down' &&
+    } else if (ghost1Direction == 'down' &&
         ways.contains('up') &&
         ways.length != 1) {
       ways.remove('up');
     }
 
-    ghostDirection = ways[Random().nextInt(ways.length)];
+    ghost1Direction = ways[Random().nextInt(ways.length)];
 
-    switch (ghostDirection) {
+    switch (ghost1Direction) {
       case "right":
-        ghostPos++;
+        ghost1Pos++;
         break;
       case "left":
-        ghostPos--;
+        ghost1Pos--;
         break;
       case "up":
-        ghostPos -= numberInRow;
+        ghost1Pos -= numberInRow;
         break;
       case "down":
-        ghostPos += numberInRow;
+        ghost1Pos += numberInRow;
+        break;
+    }
+  }
+
+  _moveGhost2() {
+    late List<String> ways = [];
+
+    if (_isNotBarrier(ghost2Pos + 1)) {
+      ways.add("right");
+    }
+    if (_isNotBarrier(ghost2Pos - 1)) {
+      ways.add("left");
+    }
+    if (_isNotBarrier(ghost2Pos - numberInRow)) {
+      ways.add("up");
+    }
+    if (_isNotBarrier(ghost2Pos + numberInRow)) {
+      ways.add("down");
+    }
+
+    // Do not reverse direction if possible
+    if (ghost2Direction == 'left' &&
+        ways.contains('right') &&
+        ways.length != 1) {
+      ways.remove('right');
+    } else if (ghost2Direction == 'right' &&
+        ways.contains('left') &&
+        ways.length != 1) {
+      ways.remove('left');
+    } else if (ghost2Direction == 'up' &&
+        ways.contains('down') &&
+        ways.length != 1) {
+      ways.remove('down');
+    } else if (ghost2Direction == 'down' &&
+        ways.contains('up') &&
+        ways.length != 1) {
+      ways.remove('up');
+    }
+
+    ghost2Direction = ways[Random().nextInt(ways.length)];
+
+    switch (ghost2Direction) {
+      case "right":
+        ghost2Pos++;
+        break;
+      case "left":
+        ghost2Pos--;
+        break;
+      case "up":
+        ghost2Pos -= numberInRow;
+        break;
+      case "down":
+        ghost2Pos += numberInRow;
+        break;
+    }
+  }
+
+  _moveGhost3() {
+    late List<String> ways = [];
+
+    if (_isNotBarrier(ghost3Pos + 1)) {
+      ways.add("right");
+    }
+    if (_isNotBarrier(ghost3Pos - 1)) {
+      ways.add("left");
+    }
+    if (_isNotBarrier(ghost3Pos - numberInRow)) {
+      ways.add("up");
+    }
+    if (_isNotBarrier(ghost3Pos + numberInRow)) {
+      ways.add("down");
+    }
+
+    // Do not reverse direction if possible
+    if (ghost3Direction == 'left' &&
+        ways.contains('right') &&
+        ways.length != 1) {
+      ways.remove('right');
+    } else if (ghost3Direction == 'right' &&
+        ways.contains('left') &&
+        ways.length != 1) {
+      ways.remove('left');
+    } else if (ghost3Direction == 'up' &&
+        ways.contains('down') &&
+        ways.length != 1) {
+      ways.remove('down');
+    } else if (ghost3Direction == 'down' &&
+        ways.contains('up') &&
+        ways.length != 1) {
+      ways.remove('up');
+    }
+
+    ghost3Direction = ways[Random().nextInt(ways.length)];
+
+    switch (ghost3Direction) {
+      case "right":
+        ghost3Pos++;
+        break;
+      case "left":
+        ghost3Pos--;
+        break;
+      case "up":
+        ghost3Pos -= numberInRow;
+        break;
+      case "down":
+        ghost3Pos += numberInRow;
         break;
     }
   }
