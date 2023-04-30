@@ -173,6 +173,11 @@ class _HomePageState extends State<HomePage> {
                         innerColor: Colors.yellow,
                         outerColor: Colors.black,
                       );
+                    } else {
+                      return const MyPath(
+                        innerColor: Colors.black,
+                        outerColor: Colors.black,
+                      );
                     }
                   }),
             ),
@@ -215,6 +220,9 @@ class _HomePageState extends State<HomePage> {
     Timer.periodic(
       const Duration(milliseconds: 120),
       (timer) {
+        if (food.contains(playerPos)) {
+          food.remove(playerPos);
+        }
         switch (direction) {
           case "right":
             _moveRight();
