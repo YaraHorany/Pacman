@@ -123,6 +123,7 @@ class _HomePageState extends State<HomePage> {
   late List<int> food = [];
 
   String direction = "right";
+  bool mouthClosed = false;
 
   @override
   void initState() {
@@ -161,7 +162,17 @@ class _HomePageState extends State<HomePage> {
                     childAspectRatio: 1.1,
                   ),
                   itemBuilder: (BuildContext context, int index) {
-                    if (playerPos == index) {
+                    if (mouthClosed && playerPos == index) {
+                      return Padding(
+                        padding: const EdgeInsets.all(4),
+                        child: Container(
+                          decoration: const BoxDecoration(
+                            color: Colors.yellow,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                      );
+                    } else if (playerPos == index) {
                       switch (direction) {
                         case "right":
                           return const MyPlayer();
@@ -246,6 +257,9 @@ class _HomePageState extends State<HomePage> {
     Timer.periodic(
       const Duration(milliseconds: 120),
       (timer) {
+        setState(() {
+          mouthClosed = !mouthClosed;
+        });
         if (food.contains(playerPos)) {
           food.remove(playerPos);
         }
