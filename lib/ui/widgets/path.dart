@@ -15,7 +15,7 @@ class MyPath extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(1.0),
+      padding: const EdgeInsets.all(1),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(6),
         child: Container(

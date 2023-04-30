@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pacman/ui/widgets/barrier.dart';
+import 'package:pacman/ui/widgets/path.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -114,6 +115,12 @@ class _HomePageState extends State<HomePage> {
     158,
     160
   ];
+  late List<int> food = [];
+
+  @override
+  void initState() {
+    _getFood();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -122,19 +129,27 @@ class _HomePageState extends State<HomePage> {
       body: Column(
         children: [
           Expanded(
-            flex: MediaQuery.of(context).size.height.toInt() ~/ 136.685,
+            flex: MediaQuery.of(context).size.height.toInt() ~/ 85.42857,
+            // flex: 8,
             child: GridView.builder(
                 itemCount: numberOfSquares,
                 physics: const NeverScrollableScrollPhysics(),
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: numberInRow,
-                  childAspectRatio: 1.21,
+                  // childAspectRatio: 1.21,
+                  childAspectRatio: 1.1,
                 ),
                 itemBuilder: (BuildContext context, int index) {
                   if (barriers.contains(index)) {
                     return MyBarrier(
                       innerColor: Colors.blue[800]!,
                       outerColor: Colors.blue[900]!,
+                      child: Text(index.toString()),
+                    );
+                  } else if (food.contains(index)) {
+                    return const MyPath(
+                      innerColor: Colors.yellow,
+                      outerColor: Colors.black,
                     );
                   }
                 }),
@@ -145,7 +160,7 @@ class _HomePageState extends State<HomePage> {
               children: [
                 const Text(
                   'Score',
-                  style: TextStyle(color: Colors.white, fontSize: 40),
+                  style: TextStyle(color: Colors.white, fontSize: 20),
                 ),
                 GestureDetector(
                   onTap: () {
@@ -153,7 +168,7 @@ class _HomePageState extends State<HomePage> {
                   },
                   child: const Text(
                     'play',
-                    style: TextStyle(color: Colors.white, fontSize: 40),
+                    style: TextStyle(color: Colors.white, fontSize: 20),
                   ),
                 ),
               ],
@@ -165,4 +180,12 @@ class _HomePageState extends State<HomePage> {
   }
 
   _play() {}
+
+  _getFood() {
+    for (int i = 0; i < numberOfSquares; i++) {
+      if (!barriers.contains(i)) {
+        food.add(i);
+      }
+    }
+  }
 }
