@@ -366,40 +366,7 @@ class _HomePageState extends State<HomePage> {
 
   // Move the ghost randomly
   _moveGhost1() {
-    late List<String> ways = [];
-
-    if (_isNotBarrier(ghost1Pos + 1)) {
-      ways.add("right");
-    }
-    if (_isNotBarrier(ghost1Pos - 1)) {
-      ways.add("left");
-    }
-    if (_isNotBarrier(ghost1Pos - numberInRow)) {
-      ways.add("up");
-    }
-    if (_isNotBarrier(ghost1Pos + numberInRow)) {
-      ways.add("down");
-    }
-
-    // Do not reverse direction if possible
-    if (ghost1Direction == 'left' &&
-        ways.contains('right') &&
-        ways.length != 1) {
-      ways.remove('right');
-    } else if (ghost1Direction == 'right' &&
-        ways.contains('left') &&
-        ways.length != 1) {
-      ways.remove('left');
-    } else if (ghost1Direction == 'up' &&
-        ways.contains('down') &&
-        ways.length != 1) {
-      ways.remove('down');
-    } else if (ghost1Direction == 'down' &&
-        ways.contains('up') &&
-        ways.length != 1) {
-      ways.remove('up');
-    }
-
+    List<String> ways = _possibleWays(ghost1Pos, ghost1Direction);
     ghost1Direction = ways[Random().nextInt(ways.length)];
 
     switch (ghost1Direction) {
@@ -419,40 +386,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   _moveGhost2() {
-    late List<String> ways = [];
-
-    if (_isNotBarrier(ghost2Pos + 1)) {
-      ways.add("right");
-    }
-    if (_isNotBarrier(ghost2Pos - 1)) {
-      ways.add("left");
-    }
-    if (_isNotBarrier(ghost2Pos - numberInRow)) {
-      ways.add("up");
-    }
-    if (_isNotBarrier(ghost2Pos + numberInRow)) {
-      ways.add("down");
-    }
-
-    // Do not reverse direction if possible
-    if (ghost2Direction == 'left' &&
-        ways.contains('right') &&
-        ways.length != 1) {
-      ways.remove('right');
-    } else if (ghost2Direction == 'right' &&
-        ways.contains('left') &&
-        ways.length != 1) {
-      ways.remove('left');
-    } else if (ghost2Direction == 'up' &&
-        ways.contains('down') &&
-        ways.length != 1) {
-      ways.remove('down');
-    } else if (ghost2Direction == 'down' &&
-        ways.contains('up') &&
-        ways.length != 1) {
-      ways.remove('up');
-    }
-
+    List<String> ways = _possibleWays(ghost2Pos, ghost2Direction);
     ghost2Direction = ways[Random().nextInt(ways.length)];
 
     switch (ghost2Direction) {
@@ -472,40 +406,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   _moveGhost3() {
-    late List<String> ways = [];
-
-    if (_isNotBarrier(ghost3Pos + 1)) {
-      ways.add("right");
-    }
-    if (_isNotBarrier(ghost3Pos - 1)) {
-      ways.add("left");
-    }
-    if (_isNotBarrier(ghost3Pos - numberInRow)) {
-      ways.add("up");
-    }
-    if (_isNotBarrier(ghost3Pos + numberInRow)) {
-      ways.add("down");
-    }
-
-    // Do not reverse direction if possible
-    if (ghost3Direction == 'left' &&
-        ways.contains('right') &&
-        ways.length != 1) {
-      ways.remove('right');
-    } else if (ghost3Direction == 'right' &&
-        ways.contains('left') &&
-        ways.length != 1) {
-      ways.remove('left');
-    } else if (ghost3Direction == 'up' &&
-        ways.contains('down') &&
-        ways.length != 1) {
-      ways.remove('down');
-    } else if (ghost3Direction == 'down' &&
-        ways.contains('up') &&
-        ways.length != 1) {
-      ways.remove('up');
-    }
-
+    List<String> ways = _possibleWays(ghost3Pos, ghost3Direction);
     ghost3Direction = ways[Random().nextInt(ways.length)];
 
     switch (ghost3Direction) {
@@ -522,5 +423,37 @@ class _HomePageState extends State<HomePage> {
         ghost3Pos += numberInRow;
         break;
     }
+  }
+
+  List<String> _possibleWays(int position, String direction) {
+    late List<String> ways = [];
+
+    if (_isNotBarrier(position + 1)) {
+      ways.add("right");
+    }
+    if (_isNotBarrier(position - 1)) {
+      ways.add("left");
+    }
+    if (_isNotBarrier(position - numberInRow)) {
+      ways.add("up");
+    }
+    if (_isNotBarrier(position + numberInRow)) {
+      ways.add("down");
+    }
+
+    // Do not reverse direction if possible
+    if (direction == 'left' && ways.contains('right') && ways.length != 1) {
+      ways.remove('right');
+    } else if (direction == 'right' &&
+        ways.contains('left') &&
+        ways.length != 1) {
+      ways.remove('left');
+    } else if (direction == 'up' && ways.contains('down') && ways.length != 1) {
+      ways.remove('down');
+    } else if (direction == 'down' && ways.contains('up') && ways.length != 1) {
+      ways.remove('up');
+    }
+
+    return ways;
   }
 }
