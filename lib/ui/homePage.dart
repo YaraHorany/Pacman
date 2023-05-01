@@ -21,6 +21,9 @@ class _HomePageState extends State<HomePage> {
   int ghost2Pos = numberInRow * 6 + 1;
   int ghost3Pos = numberInRow * 11 - 2;
 
+  bool paused = false;
+  bool gameStarted = false;
+
   final List<int> barriers = [
     0,
     1,
@@ -141,7 +144,7 @@ class _HomePageState extends State<HomePage> {
     ghost3Direction = "down";
     mouthClosed = false;
     score = 0;
-    _getFood();
+    getFood();
   }
 
   @override
@@ -154,20 +157,24 @@ class _HomePageState extends State<HomePage> {
             flex: MediaQuery.of(context).size.height.toInt() ~/ 85.42857,
             child: GestureDetector(
               onVerticalDragUpdate: (details) {
-                if (details.delta.dy > 0 &&
-                    _isNotBarrier(playerPos + numberInRow)) {
-                  playerDirection = "down";
-                } else if (details.delta.dy < 0 &&
-                    _isNotBarrier(playerPos - numberInRow)) {
-                  playerDirection = "up";
+                if (!paused) {
+                  if (details.delta.dy > 0 &&
+                      isNotBarrier(playerPos + numberInRow)) {
+                    playerDirection = "down";
+                  } else if (details.delta.dy < 0 &&
+                      isNotBarrier(playerPos - numberInRow)) {
+                    playerDirection = "up";
+                  }
                 }
               },
               onHorizontalDragUpdate: (details) {
-                if (details.delta.dx > 0 && _isNotBarrier(playerPos + 1)) {
-                  playerDirection = "right";
-                } else if (details.delta.dx < 0 &&
-                    _isNotBarrier(playerPos - 1)) {
-                  playerDirection = "left";
+                if (!paused) {
+                  if (details.delta.dx > 0 && isNotBarrier(playerPos + 1)) {
+                    playerDirection = "right";
+                  } else if (details.delta.dx < 0 &&
+                      isNotBarrier(playerPos - 1)) {
+                    playerDirection = "left";
+                  }
                 }
               },
               child: GridView.builder(
@@ -262,13 +269,35 @@ class _HomePageState extends State<HomePage> {
                 ),
                 GestureDetector(
                   onTap: () {
-                    _play();
+                    play();
                   },
                   child: const Text(
-                    'play',
+                    'Play',
                     style: TextStyle(color: Colors.white, fontSize: 20),
                   ),
                 ),
+                gameStarted
+                    ? paused
+                        ? GestureDetector(
+                            onTap: () {
+                              paused = false;
+                            },
+                            child: const Icon(
+                              Icons.play_arrow,
+                              color: Colors.white,
+                            ),
+                          )
+                        : GestureDetector(
+                            onTap: () {
+                              paused = true;
+                              mouthClosed = false;
+                            },
+                            child: const Icon(
+                              Icons.pause,
+                              color: Colors.white,
+                            ),
+                          )
+                    : const Text("")
               ],
             ),
           ),
@@ -278,7 +307,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   // Get the food's initial position.
-  _getFood() {
+  void getFood() {
     for (int i = 0; i < numberOfSquares; i++) {
       if (!barriers.contains(i)) {
         food.add(i);
@@ -286,13 +315,14 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  _play() {
+  void play() {
     playerDirection = "right";
+    gameStarted = true;
     Timer.periodic(
       const Duration(milliseconds: 120),
       (timer) {
         setState(() {
-          mouthClosed = !mouthClosed;
+          if (!paused) mouthClosed = !mouthClosed;
         });
         if (food.contains(playerPos)) {
           food.remove(playerPos);
@@ -300,56 +330,58 @@ class _HomePageState extends State<HomePage> {
         }
         switch (playerDirection) {
           case "right":
-            _moveRight();
+            if (!paused) moveRight();
             break;
           case "left":
-            _moveLeft();
+            if (!paused) moveLeft();
             break;
           case "up":
-            _moveUp();
+            if (!paused) moveUp();
             break;
           case "down":
-            _moveDown();
+            if (!paused) moveDown();
             break;
         }
       },
     );
     Timer.periodic(
-      const Duration(milliseconds: 500),
+      const Duration(milliseconds: 600),
       (timer) {
-        _moveGhost1();
-        _moveGhost2();
-        _moveGhost3();
+        if (!paused) {
+          moveGhost1();
+          moveGhost2();
+          moveGhost3();
+        }
       },
     );
   }
 
-  _moveRight() {
-    if (_isNotBarrier(playerPos + 1)) {
+  void moveRight() {
+    if (isNotBarrier(playerPos + 1)) {
       setState(() {
         playerPos++;
       });
     }
   }
 
-  _moveLeft() {
-    if (_isNotBarrier(playerPos - 1)) {
+  void moveLeft() {
+    if (isNotBarrier(playerPos - 1)) {
       setState(() {
         playerPos--;
       });
     }
   }
 
-  _moveUp() {
-    if (_isNotBarrier(playerPos - numberInRow)) {
+  void moveUp() {
+    if (isNotBarrier(playerPos - numberInRow)) {
       setState(() {
         playerPos -= numberInRow;
       });
     }
   }
 
-  _moveDown() {
-    if (_isNotBarrier(playerPos + numberInRow)) {
+  void moveDown() {
+    if (isNotBarrier(playerPos + numberInRow)) {
       setState(() {
         playerPos += numberInRow;
       });
@@ -357,7 +389,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   // Return true if the given index is located in the path and not in the barrier.
-  bool _isNotBarrier(int index) {
+  bool isNotBarrier(int index) {
     if (!barriers.contains(index)) {
       return true;
     }
@@ -365,8 +397,8 @@ class _HomePageState extends State<HomePage> {
   }
 
   // Move the ghost randomly
-  _moveGhost1() {
-    List<String> ways = _possibleWays(ghost1Pos, ghost1Direction);
+  void moveGhost1() {
+    List<String> ways = possibleWays(ghost1Pos, ghost1Direction);
     ghost1Direction = ways[Random().nextInt(ways.length)];
 
     switch (ghost1Direction) {
@@ -385,8 +417,8 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  _moveGhost2() {
-    List<String> ways = _possibleWays(ghost2Pos, ghost2Direction);
+  void moveGhost2() {
+    List<String> ways = possibleWays(ghost2Pos, ghost2Direction);
     ghost2Direction = ways[Random().nextInt(ways.length)];
 
     switch (ghost2Direction) {
@@ -405,8 +437,8 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  _moveGhost3() {
-    List<String> ways = _possibleWays(ghost3Pos, ghost3Direction);
+  void moveGhost3() {
+    List<String> ways = possibleWays(ghost3Pos, ghost3Direction);
     ghost3Direction = ways[Random().nextInt(ways.length)];
 
     switch (ghost3Direction) {
@@ -425,19 +457,19 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  List<String> _possibleWays(int position, String direction) {
+  List<String> possibleWays(int position, String direction) {
     late List<String> ways = [];
 
-    if (_isNotBarrier(position + 1)) {
+    if (isNotBarrier(position + 1)) {
       ways.add("right");
     }
-    if (_isNotBarrier(position - 1)) {
+    if (isNotBarrier(position - 1)) {
       ways.add("left");
     }
-    if (_isNotBarrier(position - numberInRow)) {
+    if (isNotBarrier(position - numberInRow)) {
       ways.add("up");
     }
-    if (_isNotBarrier(position + numberInRow)) {
+    if (isNotBarrier(position + numberInRow)) {
       ways.add("down");
     }
 
