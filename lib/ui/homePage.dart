@@ -1420,6 +1420,17 @@ class _HomePageState extends State<HomePage> {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
+                // restart button
+                GestureDetector(
+                  onTap: () {
+                    reset();
+                  },
+                  child: const Icon(
+                    Icons.restart_alt,
+                    color: Colors.white,
+                  ),
+                ),
+                // displaying the score
                 Text(
                   "Score: $score",
                   style: const TextStyle(
@@ -1427,24 +1438,7 @@ class _HomePageState extends State<HomePage> {
                       fontSize: 20,
                       fontWeight: FontWeight.bold),
                 ),
-                gameStarted
-                    ? const Text("")
-                    : GestureDetector(
-                        onTap: () {
-                          gameStarted = true;
-                          if (firstRound) {
-                            play();
-                            firstRound = false;
-                          }
-                        },
-                        child: const Text(
-                          'P L A Y',
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold),
-                        ),
-                      ),
+                // play/pause buttons
                 gameStarted
                     ? paused
                         ? GestureDetector(
@@ -1466,7 +1460,22 @@ class _HomePageState extends State<HomePage> {
                               color: Colors.white,
                             ),
                           )
-                    : const Text("")
+                    : GestureDetector(
+                        onTap: () {
+                          gameStarted = true;
+                          if (firstRound) {
+                            play();
+                            firstRound = false;
+                          }
+                        },
+                        child: const Text(
+                          'Start',
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold),
+                        ),
+                      ),
               ],
             ),
           ),
