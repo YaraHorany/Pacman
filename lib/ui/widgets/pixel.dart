@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 
-class MyPath extends StatelessWidget {
+// This class is for drawing the path and the barrier.
+class MyPixel extends StatelessWidget {
   final Color innerColor;
   final Color outerColor;
   final Widget? child;
 
-  const MyPath(
+  const MyPixel(
       {Key? key,
       required this.innerColor,
       required this.outerColor,
@@ -19,7 +20,9 @@ class MyPath extends StatelessWidget {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(6),
         child: Container(
-          padding: const EdgeInsets.all(12),
+          padding: outerColor == Colors.black
+              ? const EdgeInsets.all(12)
+              : const EdgeInsets.all(4),
           color: outerColor,
           child: ClipRRect(
             borderRadius: BorderRadius.circular(10),

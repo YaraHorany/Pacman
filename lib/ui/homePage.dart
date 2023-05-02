@@ -1,10 +1,9 @@
 import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
-import 'package:pacman/ui/widgets/barrier.dart';
 import 'package:pacman/ui/widgets/ghost.dart';
-import 'package:pacman/ui/widgets/path.dart';
 import 'package:pacman/ui/widgets/player.dart';
+import 'package:pacman/ui/widgets/pixel.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -1311,7 +1310,8 @@ class _HomePageState extends State<HomePage> {
       body: Column(
         children: [
           Expanded(
-            flex: MediaQuery.of(context).size.height.toInt() ~/ 170.857,
+            // flex: MediaQuery.of(context).size.height.toInt() ~/ 170.857,
+            flex: 10,
             child: GestureDetector(
               onVerticalDragUpdate: (details) {
                 if (!paused) {
@@ -1397,17 +1397,17 @@ class _HomePageState extends State<HomePage> {
                         ),
                       );
                     } else if (barriers[mazeNum].contains(index)) {
-                      return MyBarrier(
+                      return MyPixel(
                         innerColor: Colors.blue[800]!,
                         outerColor: Colors.blue[900]!,
                       );
                     } else if (food.contains(index)) {
-                      return const MyPath(
+                      return const MyPixel(
                         innerColor: Colors.yellow,
                         outerColor: Colors.black,
                       );
                     } else {
-                      return const MyPath(
+                      return const MyPixel(
                         innerColor: Colors.black,
                         outerColor: Colors.black,
                       );
@@ -1422,7 +1422,10 @@ class _HomePageState extends State<HomePage> {
               children: [
                 Text(
                   "Score: $score",
-                  style: const TextStyle(color: Colors.white, fontSize: 20),
+                  style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold),
                 ),
                 gameStarted
                     ? const Text("")
@@ -1435,8 +1438,11 @@ class _HomePageState extends State<HomePage> {
                           }
                         },
                         child: const Text(
-                          'Play',
-                          style: TextStyle(color: Colors.white, fontSize: 20),
+                          'P L A Y',
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold),
                         ),
                       ),
                 gameStarted
@@ -1507,9 +1513,9 @@ class _HomePageState extends State<HomePage> {
   }
 
   void play() {
-    Timer.periodic(const Duration(milliseconds: 120), (_) {
+    // Moving the player
+    Timer.periodic(const Duration(milliseconds: 170), (_) {
       if (!gameOver && gameStarted) {
-        print('first timer');
         setState(() {
           if (!paused) mouthClosed = !mouthClosed;
         });
@@ -1539,7 +1545,6 @@ class _HomePageState extends State<HomePage> {
       const Duration(milliseconds: 600),
       (_) {
         if (!gameOver && !paused && gameStarted) {
-          print('second timer');
           moveGhost1();
           moveGhost2();
           moveGhost3();
@@ -1547,9 +1552,9 @@ class _HomePageState extends State<HomePage> {
       },
     );
 
+    // Checking winning/losing scenarios
     Timer.periodic(const Duration(milliseconds: 10), (_) {
       if (!gameOver && gameStarted) {
-        print('third timer');
         if (playerPos == ghost1Pos ||
             playerPos == ghost2Pos ||
             playerPos == ghost3Pos ||
@@ -1560,10 +1565,16 @@ class _HomePageState extends State<HomePage> {
               context: context,
               builder: (BuildContext context) {
                 return AlertDialog(
+                  shape: const RoundedRectangleBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(30)),
+                  ),
                   title: food.isEmpty
-                      ? const Center(child: Text("Level cleared!"))
+                      ? const Center(child: Text("Level completed"))
                       : const Center(child: Text("Game Over!")),
-                  content: Text("Your Score : $score"),
+                  content: food.isEmpty
+                      ? const Text("Congratulations!")
+                      : Text("Your Score : $score"),
+                  // contentPadding: const EdgeInsets.only(top: 10),
                   actions: [
                     TextButton(
                       style: TextButton.styleFrom(
