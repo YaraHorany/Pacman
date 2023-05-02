@@ -16,118 +16,28 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   static int numberInRow = 11;
   int numberOfSquares = numberInRow * 16;
-  int playerPos = numberInRow * 13 + 3;
-  int ghost1Pos = numberInRow * 12 - 2;
-  int ghost2Pos = numberInRow + 1;
-  int ghost3Pos = numberInRow * 5 + 1;
+
+  late int playerPos;
+  late int ghost1Pos;
+  late int ghost2Pos;
+  late int ghost3Pos;
+
+  late String playerDirection;
+  late String ghost1Direction;
+  late String ghost2Direction;
+  late String ghost3Direction;
 
   late int mazeNum;
+  late bool paused;
+  late bool gameStarted;
+  late bool gameOver;
+  late bool mouthClosed;
+  late int score;
+  bool firstRound = true;
 
-  bool paused = false;
-  bool gameStarted = false;
-
-  // final List<int> barriers = [
-  //   0,
-  //   1,
-  //   2,
-  //   3,
-  //   4,
-  //   5,
-  //   6,
-  //   7,
-  //   8,
-  //   9,
-  //   10,
-  //   11,
-  //   22,
-  //   33,
-  //   44,
-  //   55,
-  //   66,
-  //   77,
-  //   99,
-  //   110,
-  //   121,
-  //   132,
-  //   143,
-  //   154,
-  //   165,
-  //   176,
-  //   177,
-  //   178,
-  //   179,
-  //   180,
-  //   181,
-  //   182,
-  //   183,
-  //   184,
-  //   185,
-  //   186,
-  //   175,
-  //   164,
-  //   153,
-  //   142,
-  //   131,
-  //   120,
-  //   109,
-  //   87,
-  //   76,
-  //   65,
-  //   54,
-  //   43,
-  //   32,
-  //   21,
-  //   78,
-  //   79,
-  //   80,
-  //   100,
-  //   101,
-  //   102,
-  //   84,
-  //   85,
-  //   86,
-  //   106,
-  //   107,
-  //   108,
-  //   24,
-  //   35,
-  //   46,
-  //   57,
-  //   30,
-  //   41,
-  //   52,
-  //   63,
-  //   81,
-  //   70,
-  //   59,
-  //   61,
-  //   72,
-  //   83,
-  //   26,
-  //   28,
-  //   37,
-  //   38,
-  //   39,
-  //   123,
-  //   134,
-  //   145,
-  //   156,
-  //   129,
-  //   140,
-  //   151,
-  //   162,
-  //   103,
-  //   114,
-  //   125,
-  //   105,
-  //   116,
-  //   127,
-  //   147,
-  //   148,
-  //   149,
-  //   158,
-  //   160
-  // ];
+  late Timer timer1;
+  late Timer timer2;
+  late Timer timer3;
 
   List<List<int>> barriers = [
     //Easy
@@ -1392,24 +1302,10 @@ class _HomePageState extends State<HomePage> {
 
   late List<int> food = [];
 
-  late String playerDirection;
-  late String ghost1Direction;
-  late String ghost2Direction;
-  late String ghost3Direction;
-  late bool mouthClosed;
-  late int score;
-
   @override
   void initState() {
     super.initState();
-    playerDirection = "right";
-    ghost1Direction = "left";
-    ghost2Direction = "right";
-    ghost3Direction = "down";
-    mouthClosed = false;
-    score = 0;
-    mazeNum = Random().nextInt(barriers.length);
-    getFood();
+    reset();
   }
 
   @override
@@ -1419,7 +1315,7 @@ class _HomePageState extends State<HomePage> {
       body: Column(
         children: [
           Expanded(
-            flex: MediaQuery.of(context).size.height.toInt() ~/ 85.42857,
+            flex: MediaQuery.of(context).size.height.toInt() ~/ 170.857,
             child: GestureDetector(
               onVerticalDragUpdate: (details) {
                 if (!paused) {
@@ -1447,7 +1343,7 @@ class _HomePageState extends State<HomePage> {
                   physics: const NeverScrollableScrollPhysics(),
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: numberInRow,
-                    childAspectRatio: 1.1,
+                    // childAspectRatio: 1.1,
                   ),
                   itemBuilder: (BuildContext context, int index) {
                     if (mouthClosed && playerPos == index) {
@@ -1508,7 +1404,6 @@ class _HomePageState extends State<HomePage> {
                       return MyBarrier(
                         innerColor: Colors.blue[800]!,
                         outerColor: Colors.blue[900]!,
-                        child: Text(index.toString()),
                       );
                     } else if (food.contains(index)) {
                       return const MyPath(
@@ -1527,20 +1422,27 @@ class _HomePageState extends State<HomePage> {
           Expanded(
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Text(
                   "Score: $score",
                   style: const TextStyle(color: Colors.white, fontSize: 20),
                 ),
-                GestureDetector(
-                  onTap: () {
-                    play();
-                  },
-                  child: const Text(
-                    'Play',
-                    style: TextStyle(color: Colors.white, fontSize: 20),
-                  ),
-                ),
+                gameStarted
+                    ? const Text("")
+                    : GestureDetector(
+                        onTap: () {
+                          gameStarted = true;
+                          if (firstRound) {
+                            play();
+                            firstRound = false;
+                          }
+                        },
+                        child: const Text(
+                          'Play',
+                          style: TextStyle(color: Colors.white, fontSize: 20),
+                        ),
+                      ),
                 gameStarted
                     ? paused
                         ? GestureDetector(
@@ -1571,6 +1473,34 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  void reset() {
+    setState(() {
+      // Initial positions
+      playerPos = numberInRow * 13 + 3;
+      ghost1Pos = numberInRow * 12 - 2;
+      ghost2Pos = numberInRow + 1;
+      ghost3Pos = numberInRow * 5 + 1;
+
+      // Initial directions
+      playerDirection = "right";
+      ghost1Direction = "left";
+      ghost2Direction = "right";
+      ghost3Direction = "down";
+
+      // Choose a random maze
+      mazeNum = Random().nextInt(barriers.length);
+
+      paused = false;
+      gameStarted = false;
+      gameOver = false;
+
+      mouthClosed = false;
+      score = 0;
+      food.clear();
+      getFood();
+    });
+  }
+
   // Get the food's initial position.
   void getFood() {
     for (int i = 0; i < numberOfSquares; i++) {
@@ -1581,11 +1511,9 @@ class _HomePageState extends State<HomePage> {
   }
 
   void play() {
-    playerDirection = "right";
-    gameStarted = true;
-    Timer.periodic(
-      const Duration(milliseconds: 120),
-      (timer) {
+    timer1 = Timer.periodic(const Duration(milliseconds: 120), (_) {
+      if (!gameOver && gameStarted) {
+        print('first timer');
         setState(() {
           if (!paused) mouthClosed = !mouthClosed;
         });
@@ -1608,25 +1536,57 @@ class _HomePageState extends State<HomePage> {
             break;
         }
 
-        if (playerPos == ghost1Pos ||
-            playerPos == ghost2Pos ||
-            playerPos == ghost3Pos) {
-          print("GAME OVER");
+        if (food.isEmpty) {
+          print('LEVEL COMPLETED');
           paused = true;
           mouthClosed = false;
         }
-      },
-    );
-    Timer.periodic(
+      }
+    });
+
+    // Moving the ghosts.
+    timer2 = Timer.periodic(
       const Duration(milliseconds: 600),
-      (timer) {
-        if (!paused) {
+      (_) {
+        if (!gameOver && !paused && gameStarted) {
+          print('second timer');
           moveGhost1();
           moveGhost2();
           moveGhost3();
         }
       },
     );
+
+    timer3 = Timer.periodic(const Duration(milliseconds: 10), (_) {
+      if (!gameOver && gameStarted) {
+        print('third timer');
+        if (playerPos == ghost1Pos ||
+            playerPos == ghost2Pos ||
+            playerPos == ghost3Pos) {
+          gameOver = true;
+          showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return AlertDialog(
+                  title: const Center(child: Text("Game Over!")),
+                  content: Text("Your Score : $score"),
+                  actions: [
+                    TextButton(
+                      style: TextButton.styleFrom(
+                        textStyle: Theme.of(context).textTheme.labelLarge,
+                      ),
+                      child: const Text('Restart'),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                        reset();
+                      },
+                    ),
+                  ],
+                );
+              });
+        }
+      }
+    });
   }
 
   void moveRight() {
