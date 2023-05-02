@@ -35,10 +35,6 @@ class _HomePageState extends State<HomePage> {
   late int score;
   bool firstRound = true;
 
-  late Timer timer1;
-  late Timer timer2;
-  late Timer timer3;
-
   List<List<int>> barriers = [
     //Easy
     [
@@ -1511,7 +1507,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   void play() {
-    timer1 = Timer.periodic(const Duration(milliseconds: 120), (_) {
+    Timer.periodic(const Duration(milliseconds: 120), (_) {
       if (!gameOver && gameStarted) {
         print('first timer');
         setState(() {
@@ -1535,17 +1531,11 @@ class _HomePageState extends State<HomePage> {
             if (!paused) moveDown();
             break;
         }
-
-        if (food.isEmpty) {
-          print('LEVEL COMPLETED');
-          paused = true;
-          mouthClosed = false;
-        }
       }
     });
 
     // Moving the ghosts.
-    timer2 = Timer.periodic(
+    Timer.periodic(
       const Duration(milliseconds: 600),
       (_) {
         if (!gameOver && !paused && gameStarted) {
@@ -1557,18 +1547,22 @@ class _HomePageState extends State<HomePage> {
       },
     );
 
-    timer3 = Timer.periodic(const Duration(milliseconds: 10), (_) {
+    Timer.periodic(const Duration(milliseconds: 10), (_) {
       if (!gameOver && gameStarted) {
         print('third timer');
         if (playerPos == ghost1Pos ||
             playerPos == ghost2Pos ||
-            playerPos == ghost3Pos) {
+            playerPos == ghost3Pos ||
+            food.isEmpty) {
           gameOver = true;
+          mouthClosed = false;
           showDialog(
               context: context,
               builder: (BuildContext context) {
                 return AlertDialog(
-                  title: const Center(child: Text("Game Over!")),
+                  title: food.isEmpty
+                      ? const Center(child: Text("Level cleared!"))
+                      : const Center(child: Text("Game Over!")),
                   content: Text("Your Score : $score"),
                   actions: [
                     TextButton(
