@@ -1,19 +1,20 @@
-# pacman
+# Pacman
 
-A new Flutter project.
+## About
 
-## Getting Started
+The beloved vintage Pacman game with Flutter Animations compatible in both Android and IOS. </br>
+The player controls Pac-Man, who must eat all the dots inside an enclosed maze while avoiding four colored ghosts.
 
-This project is a starting point for a Flutter application.
+## Game instructions
 
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+1. Press Start button
+2. Use gestures for moving
+   * Swipe left to move left.
+   * Swipe right to move right.
+   * Swipe up to move up.
+   * Swipe down to move down.
+3. Stay away from ghosts.
+4. Eat all the food.
 
 ## Screenshots
 
