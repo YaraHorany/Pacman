@@ -1509,8 +1509,6 @@ class _HomePageState extends State<HomePage> {
       score = 0;
       food.clear();
       getFood();
-      score = food.length;
-      food.clear();
     });
   }
 
