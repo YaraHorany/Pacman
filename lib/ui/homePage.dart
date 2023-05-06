@@ -29,10 +29,8 @@ class _HomePageState extends State<HomePage> {
   late int mazeNum;
   late bool paused;
   late bool gameStarted;
-  late bool gameOver;
   late bool mouthClosed;
   late int score;
-  bool firstRound = true;
 
   List<List<int>> barriers = [
     //Easy
@@ -1297,10 +1295,40 @@ class _HomePageState extends State<HomePage> {
 
   late List<int> food = [];
 
+  Timer? timer1;
+  Timer? timer2;
+  Timer? timer3;
+
   @override
   void initState() {
     super.initState();
     reset();
+  }
+
+  void reset() {
+    setState(() {
+      // Initial positions
+      playerPos = numberInRow * 13 + 3;
+      ghost1Pos = numberInRow * 12 - 2;
+      ghost2Pos = numberInRow + 1;
+      ghost3Pos = numberInRow * 5 + 1;
+
+      // Initial directions
+      playerDirection = "right";
+      ghost1Direction = "left";
+      ghost2Direction = "right";
+      ghost3Direction = "down";
+
+      // Choose a random maze
+      mazeNum = Random().nextInt(barriers.length);
+
+      paused = false;
+      gameStarted = false;
+      mouthClosed = false;
+      score = 0;
+      food.clear();
+      getFood();
+    });
   }
 
   @override
@@ -1441,75 +1469,48 @@ class _HomePageState extends State<HomePage> {
                 // play/pause buttons
                 gameStarted
                     ? paused
-                        ? GestureDetector(
-                            onTap: () {
-                              paused = false;
-                            },
-                            child: const Icon(
-                              Icons.play_arrow,
-                              color: Colors.white,
-                            ),
-                          )
-                        : GestureDetector(
-                            onTap: () {
-                              paused = true;
-                              mouthClosed = false;
-                            },
-                            child: const Icon(
-                              Icons.pause,
-                              color: Colors.white,
-                            ),
-                          )
+                    ? GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      paused = false;
+                    });
+                  },
+                  child: const Icon(
+                    Icons.play_arrow,
+                    color: Colors.white,
+                  ),
+                )
                     : GestureDetector(
-                        onTap: () {
-                          gameStarted = true;
-                          if (firstRound) {
-                            play();
-                            firstRound = false;
-                          }
-                        },
-                        child: const Text(
-                          'Start',
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold),
-                        ),
-                      ),
+                  onTap: () {
+                    setState(() {
+                      paused = true;
+                      mouthClosed = false;
+                    });
+                  },
+                  child: const Icon(
+                    Icons.pause,
+                    color: Colors.white,
+                  ),
+                )
+                    : GestureDetector(
+                  onTap: () {
+                    gameStarted = true;
+                    play();
+                  },
+                  child: const Text(
+                    'Start',
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold),
+                  ),
+                ),
               ],
             ),
           ),
         ],
       ),
     );
-  }
-
-  void reset() {
-    setState(() {
-      // Initial positions
-      playerPos = numberInRow * 13 + 3;
-      ghost1Pos = numberInRow * 12 - 2;
-      ghost2Pos = numberInRow + 1;
-      ghost3Pos = numberInRow * 5 + 1;
-
-      // Initial directions
-      playerDirection = "right";
-      ghost1Direction = "left";
-      ghost2Direction = "right";
-      ghost3Direction = "down";
-
-      // Choose a random maze
-      mazeNum = Random().nextInt(barriers.length);
-
-      paused = false;
-      gameStarted = false;
-      gameOver = false;
-
-      mouthClosed = false;
-      score = 0;
-      food.clear();
-      getFood();
-    });
   }
 
   // Get the food's initial position.
@@ -1523,10 +1524,10 @@ class _HomePageState extends State<HomePage> {
 
   void play() {
     // Moving the player
-    Timer.periodic(const Duration(milliseconds: 170), (_) {
-      if (!gameOver && gameStarted) {
+    timer1 = Timer.periodic(const Duration(milliseconds: 170), (_) {
+      if (!paused && gameStarted) {
         setState(() {
-          if (!paused) mouthClosed = !mouthClosed;
+          mouthClosed = !mouthClosed;
         });
         if (food.contains(playerPos)) {
           food.remove(playerPos);
@@ -1534,26 +1535,26 @@ class _HomePageState extends State<HomePage> {
         }
         switch (playerDirection) {
           case "right":
-            if (!paused) moveRight();
+            moveRight();
             break;
           case "left":
-            if (!paused) moveLeft();
+            moveLeft();
             break;
           case "up":
-            if (!paused) moveUp();
+            moveUp();
             break;
           case "down":
-            if (!paused) moveDown();
+            moveDown();
             break;
         }
       }
     });
 
     // Moving the ghosts.
-    Timer.periodic(
+    timer2 = Timer.periodic(
       const Duration(milliseconds: 600),
-      (_) {
-        if (!gameOver && !paused && gameStarted) {
+          (_) {
+        if (!paused && gameStarted) {
           moveGhost1();
           moveGhost2();
           moveGhost3();
@@ -1562,14 +1563,14 @@ class _HomePageState extends State<HomePage> {
     );
 
     // Checking winning/losing scenarios
-    Timer.periodic(const Duration(milliseconds: 10), (_) {
-      if (!gameOver && gameStarted) {
+    timer3 = Timer.periodic(const Duration(milliseconds: 10), (_) {
+      if (gameStarted) {
         if (playerPos == ghost1Pos ||
             playerPos == ghost2Pos ||
             playerPos == ghost3Pos ||
             food.isEmpty) {
-          gameOver = true;
           mouthClosed = false;
+          stopTimers();
           showDialog(
               context: context,
               builder: (BuildContext context) {
@@ -1734,5 +1735,11 @@ class _HomePageState extends State<HomePage> {
     }
 
     return ways;
+  }
+
+  void stopTimers() {
+    timer1?.cancel();
+    timer2?.cancel();
+    timer3?.cancel();
   }
 }
